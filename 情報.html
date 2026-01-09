@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情報I 共通テスト完全網羅マスター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .memorize-mask {
+            background-color: #ef4444;
+            color: #ef4444;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            padding: 0 4px;
+            display: inline-block;
+            min-width: 1.5em;
+        }
+        .memorize-mask:hover, .memorize-mask.revealed {
+            background-color: #fee2e2;
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .code-block {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+        .keyword-em {
+            background: linear-gradient(transparent 60%, #fef08a 60%);
+            font-weight: bold;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+        
+        // --- アイコンコンポーネント ---
+        const Icon = ({ name, size = 20, className }) => {
+            const icons = {
+                BookOpen: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                Cpu: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>,
+                Binary: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="14" y="14" width="4" height="6" rx="2"/><rect x="6" y="4" width="4" height="6" rx="2"/><path d="M6 20h4"/><path d="M14 10h4"/><path d="M6 14h2v6"/><path d="M14 4h2v6"/></svg>,
+                BarChart3: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>,
+                Eye: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+                EyeOff: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
+                ChevronDown: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"/></svg>,
+                ChevronRight: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6"/></svg>,
+                Network: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>,
+                Shield: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+                Globe: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+                Code: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+                Terminal: <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            };
+            return icons[name] || <span>?</span>;
+        };
+
+        // --- データ定義 (完全網羅版) ---
+        const studyData = {
+            society: {
+                title: "情報社会・法規・デザイン",
+                icon: "BookOpen",
+                color: "blue",
+                sections: [
+                    {
+                        title: "1. 情報社会と法規",
+                        content: [
+                            { term: "知的財産権", desc: "人間の知的創造活動の成果。著作権（無方式主義）と産業財産権（特許・実用新案・意匠・商標／方式主義）に大別される。" },
+                            { term: "著作人格権", desc: "公表権（いつ公表するか）、氏名表示権（名前を出すか）、同一性保持権（勝手に変えられない）の3つ。譲渡不可。" },
+                            { term: "著作財産権", desc: "複製権、公衆送信権など。譲渡・相続が可能。保護期間は原則死後70年。" },
+                            { term: "CCライセンス", desc: "Creative Commons。BY(表示)、NC(非営利)、ND(改変禁止)、SA(継承)の組み合わせで利用条件を示す。" },
+                            { term: "個人情報保護法", desc: "特定の個人を識別できる情報を取り扱う事業者の義務を規定。要配慮個人情報（病歴・信条など）は取得に原則同意が必要。" },
+                            { term: "プロバイダ責任制限法", desc: "ネット上の権利侵害時のプロバイダの責任制限と、発信者情報開示請求権を定めた法律。" },
+                            { term: "不正アクセス禁止法", desc: "他人のID/パスワードの無断入力や、セキュリティホールを突く行為自体を処罰する。" },
+                            { term: "労働関連法", desc: "労働基準法に加え、裁量労働制（成果重視）、フレックスタイム制（時間帯選択）、テレワークなどが情報社会の働き方。" }
+                        ]
+                    },
+                    {
+                        title: "2. 情報セキュリティ",
+                        content: [
+                            { term: "CIA", desc: "機密性(Confidentiality: 許可された人だけ)、完全性(Integrity: 改ざんされていない)、可用性(Availability: いつでも使える)の3要素。" },
+                            { term: "マルウェア", desc: "ウイルス（寄生型）、ワーム（単独増殖型）、トロイの木馬（偽装型）、ランサムウェア（身代金要求）、スパイウェア（情報窃取）。" },
+                            { term: "サイバー攻撃手法", desc: "DDoS攻撃（大量アクセスで麻痺）、SQLインジェクション（DB不正操作）、フィッシング（偽サイト誘導）、ソーシャルエンジニアリング（物理・心理的盗難）。" },
+                            { term: "認証技術", desc: "生体認証（バイオメトリクス）では、FRR（本人拒否率）とFAR（他人受入率）はトレードオフの関係にある。" },
+                            { term: "公開鍵暗号", desc: "受信者の公開鍵で暗号化→受信者の秘密鍵で復号。鍵配送問題を解決。処理は遅い。" },
+                            { term: "共通鍵暗号", desc: "同じ鍵で暗号化・復号。処理は速いが、鍵の受け渡しが危険。AESなどが代表例。" },
+                            { term: "ハイブリッド暗号", desc: "本文は共通鍵で暗号化し、その共通鍵を公開鍵暗号で送る方式（SSL/TLSなどで使用）。" },
+                            { term: "ディジタル署名", desc: "送信者の秘密鍵でハッシュ値を暗号化。「なりすまし」「改ざん」「事後否認」を防止。" }
+                        ]
+                    },
+                    {
+                        title: "3. 情報デザインと社会",
+                        content: [
+                            { term: "ユニバーサルデザイン", desc: "「公平性」「柔軟性」「単純性」「知覚可能性」「エラー許容」「身体的負担軽減」「スペース確保」の7原則。" },
+                            { term: "アクセシビリティ", desc: "高齢者や障害者を含め、誰もが支障なく利用できる度合い。Webアクセシビリティ（JIS X 8341-3）など。" },
+                            { term: "ユーザビリティ", desc: "特定の利用者が特定の目的を達成する際の「有効性」「効率性」「満足度」。" },
+                            { term: "プロトタイピング", desc: "試作品を早期に作り、ユーザーの反応を見ながら改善する開発手法。" },
+                            { term: "情報格差", desc: "デジタルデバイド。ICTを利用できる人とできない人の間に生じる社会的・経済的な格差。" },
+                            { term: "オプトイン/アウト", desc: "オプトイン（原則同意が必要）、オプトアウト（拒否しない限り同意とみなす）。メルマガやクッキー規制に関連。" }
+                        ]
+                    }
+                ]
+            },
+            digital: {
+                title: "デジタル・ネットワーク",
+                icon: "Network",
+                color: "green",
+                sections: [
+                    {
+                        title: "1. 情報のデジタル化",
+                        content: [
+                            { term: "AD変換", desc: "標本化（時間方向の分割: Hz）→量子化（電圧の数値化: bit）→符号化（2進数化）。" },
+                            { term: "標本化定理", desc: "元の周波数の2倍以上の周波数で標本化すれば、元の波形を再現できる。" },
+                            { term: "画像のデータ量", desc: "横画素数×縦画素数×色深度(bit)。例: 24bitカラー＝1677万色（RGB各8bit）。" },
+                            { term: "動画の仕組み", desc: "フレーム（静止画）の連続。フレームレート(fps)が高いほど滑らか。圧縮にはフレーム間予測（差分記録）を使う。" },
+                            { term: "文字コード", desc: "ASCII（英数字7bit）、Shift_JIS（日本語）、Unicode（世界標準、UTF-8はその符号化方式）。文字化けはコード不一致で発生。" }
+                        ]
+                    },
+                    {
+                        title: "2. コンピュータの仕組み",
+                        content: [
+                            { term: "5大装置", desc: "入力、出力、記憶、演算、制御。演算＋制御＝CPU（中央処理装置）。" },
+                            { term: "ノイマン型", desc: "プログラムとデータを主記憶（メモリ）に読み込んで実行する方式（プログラム内蔵方式）。" },
+                            { term: "記憶階層", desc: "高速・小容量・高価 ← レジスタ、キャッシュ、主記憶、SSD/HDD、テープ → 低速・大容量・安価。" },
+                            { term: "OSの役割", desc: "プロセス管理（タスク管理）、メモリ管理、ファイル管理、デバイス管理、APIの提供。" }
+                        ]
+                    },
+                    {
+                        title: "3. ネットワーク技術",
+                        content: [
+                            { term: "プロトコル", desc: "通信の約束事。TCP/IPモデルが標準。アプリケーション層、トランスポート層、インターネット層、リンク層。" },
+                            { term: "TCP vs UDP", desc: "TCPはコネクション型で信頼性重視（Web, メール）。UDPはコネクションレスで速度重視（動画配信, DNS）。" },
+                            { term: "IPアドレス", desc: "IPv4(32bit)とIPv6(128bit)。グローバルIP（唯一）とプライベートIP（組織内）。NAT/NAPTで変換。" },
+                            { term: "DHCP", desc: "PC接続時にIPアドレスなどの設定を自動割り当てする仕組み。" },
+                            { term: "DNS", desc: "ドメイン名（www.xx.jp）をIPアドレスに変換するシステム（正引き）。分散データベース構造。" },
+                            { term: "パケット交換", desc: "データを小分け（パケット）にして送る。回線を占有せず、複数の通信が共存できる。経路制御（ルーティング）が必要。" },
+                            { term: "メールプロトコル", desc: "SMTP（送信・転送）、POP（受信・ダウンロード）、IMAP（受信・サーバー上で管理）。" }
+                        ]
+                    }
+                ]
+            },
+            computer: {
+                title: "アルゴリズム・プログラミング",
+                icon: "Code",
+                color: "purple",
+                sections: [
+                    {
+                        title: "1. プログラミング基礎",
+                        content: [
+                            { term: "データ型", desc: "整数(Integer)、浮動小数点数(Float)、文字列(String)、論理値(Boolean/True,False)。" },
+                            { term: "演算子", desc: "算術(+, -, *, /, %, //, **)、比較(==, !=, <, >)、論理(and, or, not)。" },
+                            { term: "制御構造", desc: "順次（上から下へ）、分岐（if）、反復（for, while）の3つですべての処理を記述できる（構造化プログラミング）。" },
+                            { term: "配列・リスト", desc: "複数のデータをまとめて管理。添字（インデックス）は0から始まる言語（Python/JS）と1から始まる言語（DNCLの一部）があるため注意。" },
+                            { term: "関数", desc: "引数（入力）を受け取り、戻り値（出力）を返すひとかたまりの処理。変数のスコープ（有効範囲）に注意。" }
+                        ]
+                    },
+                    {
+                        title: "2. アルゴリズムと計算量",
+                        content: [
+                            { term: "線形探索", desc: "先頭から順に探す。計算量はデータ数nに比例する。オーダーは O(n)。" },
+                            { term: "二分探索", desc: "整列済みデータに対して、中央と比較し範囲を半分にする。計算量は O(log n)。" },
+                            { term: "交換法", desc: "バブルソート。隣同士を交換。O(n^2)。遅い。" },
+                            { term: "選択法", desc: "未整列部から最小値を選んで交換。O(n^2)。遅い。" },
+                            { term: "クイックソート", desc: "ピボット（基準値）を使い分割統治法で整列。平均計算量は O(n log n)。高速。" }
+                        ]
+                    },
+                    {
+                        title: "3. 論理回路",
+                        content: [
+                            { term: "基本回路", desc: "AND（論理積・直列）、OR（論理和・並列）、NOT（否定）。NAND（否定論理積）などはこれらで構成可能。" },
+                            { term: "半加算器", desc: "1ビット同士の加算。桁上がりなしの和(S)はXOR、桁上がり(C)はANDで出力する。" },
+                            { term: "全加算器", desc: "下位からの桁上がり入力も含めた3入力の加算回路。半加算器2つとOR回路で作れる。" }
+                        ]
+                    }
+                ]
+            },
+            data: {
+                title: "データ活用・分析",
+                icon: "BarChart3",
+                color: "orange",
+                sections: [
+                    {
+                        title: "1. 統計・分析手法",
+                        content: [
+                            { term: "代表値", desc: "平均値（外れ値に弱い）、中央値（順位が真ん中）、最頻値（最も多い）。分布が歪んでいるとこれらは一致しない。" },
+                            { term: "分散・標準偏差", desc: "データのばらつきを表す。分散＝(偏差の2乗の平均)。標準偏差＝分散のルート。単位は標準偏差が元データと同じ。" },
+                            { term: "相関係数", desc: "-1（負の相関）〜 0（無相関）〜 +1（正の相関）。因果関係を示すわけではない（疑似相関に注意）。" },
+                            { term: "回帰分析", desc: "散布図の点に最も当てはまる直線（回帰直線 y=ax+b）を求める。目的変数を説明変数で予測する。" },
+                            { term: "決定係数", desc: "回帰分析の当てはまりの良さを示す指標（0〜1）。1に近いほど予測精度が高い。" }
+                        ]
+                    },
+                    {
+                        title: "2. データの整理と可視化",
+                        content: [
+                            { term: "データの種類", desc: "1次データ（自分で収集）、2次データ（既存）。質的データ（分類）、量的データ（数値）。" },
+                            { term: "クロス集計", desc: "2つの属性（例：性別と回答）を表にして相互関係を分析する手法。" },
+                            { term: "グラフ選択", desc: "構成比→円グラフ/帯グラフ、推移→折れ線、比較→棒グラフ、分布→ヒストグラム/箱ひげ図、相関→散布図。" },
+                            { term: "箱ひげ図", desc: "最大値、最小値、四分位数（Q1, Q2=中央値, Q3）を表す。箱の長さはIQR（四分位範囲）。" }
+                        ]
+                    },
+                    {
+                        title: "3. データサイエンスとDB",
+                        content: [
+                            { term: "データベース", desc: "RDB（リレーショナルDB）が主流。テーブル（表）、レコード（行）、フィールド（列）で構成。" },
+                            { term: "キー", desc: "主キー（行を一意に特定、重複・空不可）。外部キー（他の表と紐付け）。" },
+                            { term: "SQL", desc: "SELECT 列 FROM 表 WHERE 条件 ORDER BY 並び順 (ASC/DESC)。集計関数(SUM, AVG, COUNT)も頻出。" },
+                            { term: "欠損値処理", desc: "データが空の部分。リストワイズ除去（行ごと削除）、平均値代入などで処理する。" }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        const TermCard = ({ term, desc, isHidden, onToggle }) => (
+            <div className="bg-white border border-slate-200 rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex flex-col gap-1">
+                    <h3 className="font-bold text-base sm:text-lg flex items-center gap-2 text-slate-800">
+                        <span 
+                            className={`${isHidden ? "memorize-mask" : ""} cursor-pointer`}
+                            onClick={onToggle}
+                        >
+                            {term}
+                        </span>
+                    </h3>
+                    <p className="text-slate-600 text-sm leading-relaxed tracking-wide">
+                        {/* 解説文中の特定のキーワードもハイライトしたい場合はここで処理可能だが今回はシンプルに */}
+                        {desc}
+                    </p>
+                </div>
+            </div>
+        );
+
+        const CategorySection = ({ title, content, isHiddenMode }) => {
+            const [isExpanded, setIsExpanded] = useState(true);
+            const [revealedItems, setRevealedItems] = useState({});
+
+            const toggleReveal = (index) => {
+                if (!isHiddenMode) return;
+                setRevealedItems(prev => ({...prev, [index]: !prev[index]}));
+            };
+
+            useEffect(() => { setRevealedItems({}); }, [isHiddenMode]);
+
+            return (
+                <div className="mb-4 bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                    <button 
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100"
+                    >
+                        <h2 className="font-bold text-base sm:text-lg text-slate-800 border-l-4 border-indigo-500 pl-3 text-left">
+                            {title}
+                        </h2>
+                        {isExpanded ? <Icon name="ChevronDown" className="text-slate-400 shrink-0" /> : <Icon name="ChevronRight" className="text-slate-400 shrink-0" />}
+                    </button>
+                    
+                    {isExpanded && (
+                        <div className="p-3 grid grid-cols-1 gap-3 bg-slate-50/50">
+                            {content.map((item, idx) => (
+                                <TermCard 
+                                    key={idx} 
+                                    term={item.term} 
+                                    desc={item.desc}
+                                    isHidden={isHiddenMode && !revealedItems[idx]}
+                                    onToggle={() => toggleReveal(idx)}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- アルゴリズム・プログラミング特化コンポーネント ---
+        const CodeStudy = () => {
+            const [algoType, setAlgoType] = useState('search');
+            
+            const codes = {
+                search: {
+                    title: "線形探索法 (Linear Search)",
+                    desc: "配列の先頭から順に探す基本アルゴリズム。",
+                    code: `data = [3, 1, 4, 1, 5, 9, 2]
+target = 5
+found = False
+
+for i in range(len(data)):  # 0からデータの個数-1まで繰り返す
+    if data[i] == target:   # もしデータと探す値が一致したら
+        print(i, "番目に見つかりました")
+        found = True
+        break               # 見つかったのでループを抜ける
+
+if found == False:
+    print("見つかりませんでした")`
+                },
+                sort: {
+                    title: "交換法 (Bubble Sort)",
+                    desc: "隣り合う要素を比較し、順序が逆なら交換する。",
+                    code: `data = [5, 3, 8, 1, 2]
+n = len(data)
+
+for i in range(n - 1):          # 確定させる位置を決めるループ
+    for j in range(n - 1, i, -1): # 後ろから順に比較するループ
+        if data[j-1] > data[j]:   # 前の方が大きければ（昇順の場合）
+            # データを交換する（スワップ）
+            temp = data[j]
+            data[j] = data[j-1]
+            data[j-1] = temp
+
+print(data) # [1, 2, 3, 5, 8]`
+                }
+            };
+
+            return (
+                <div className="bg-slate-800 text-slate-200 p-4 rounded-xl my-6 border border-slate-700 shadow-md">
+                    <h3 className="font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-600 pb-2">
+                        <Icon name="Terminal" className="text-green-400"/>
+                        アルゴリズム徹底解剖
+                    </h3>
+                    <div className="flex gap-2 mb-4">
+                        <button onClick={()=>setAlgoType('search')} className={`px-3 py-1 rounded text-sm ${algoType==='search'?'bg-indigo-600 text-white':'bg-slate-700 hover:bg-slate-600'}`}>探索</button>
+                        <button onClick={()=>setAlgoType('sort')} className={`px-3 py-1 rounded text-sm ${algoType==='sort'?'bg-indigo-600 text-white':'bg-slate-700 hover:bg-slate-600'}`}>整列</button>
+                    </div>
+                    <div className="mb-2">
+                        <h4 className="font-bold text-green-300">{codes[algoType].title}</h4>
+                        <p className="text-xs text-slate-400 mb-2">{codes[algoType].desc}</p>
+                        <pre className="code-block text-xs sm:text-sm">
+                            {codes[algoType].code}
+                        </pre>
+                    </div>
+                    <div className="text-xs text-slate-400 mt-2">
+                        ※共通テストの擬似言語では、配列の添字や代入記号（←）の表記が異なる場合があるため注意。
+                    </div>
+                </div>
+            );
+        };
+
+        const CalcTool = () => {
+             const [mb, setMb] = useState(10);
+             const [bps, setBps] = useState(50);
+             
+             const result = useMemo(() => {
+                 if(!mb || !bps) return 0;
+                 // 1Byte = 8bit
+                 // 転送時間 = データ量(bit) / 通信速度(bps)
+                 // MB -> bit: MB * 10^6 * 8 (※ここでは1MB=10^6B計算とするのが通例だが問題による。今回は1000換算)
+                 const bits = mb * 1000 * 1000 * 8;
+                 const speed = bps * 1000 * 1000;
+                 return (bits / speed).toFixed(1);
+             }, [mb, bps]);
+
+             return (
+                 <div className="bg-green-50 p-4 rounded-xl border border-green-100 my-4 shadow-sm">
+                     <h3 className="font-bold text-green-800 text-sm mb-3 flex items-center gap-2">
+                        <Icon name="Network" size={16}/> 転送時間計算シミュレータ
+                     </h3>
+                     <div className="flex items-center gap-2 text-sm mb-2">
+                        <input type="number" value={mb} onChange={e=>setMb(Number(e.target.value))} className="w-20 p-1 border rounded text-right"/>
+                        <span>MB のデータを</span>
+                     </div>
+                     <div className="flex items-center gap-2 text-sm mb-3">
+                        <input type="number" value={bps} onChange={e=>setBps(Number(e.target.value))} className="w-20 p-1 border rounded text-right"/>
+                        <span>Mbps で送ると...</span>
+                     </div>
+                     <div className="bg-white p-2 rounded text-center border border-green-200">
+                        <span className="text-xl font-bold text-green-600">{result}</span> 秒かかる
+                        <p className="text-[10px] text-slate-500 mt-1">※MBを8倍してbitに直すのがポイント！</p>
+                     </div>
+                 </div>
+             )
+        }
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('society');
+            const [memorizeMode, setMemorizeMode] = useState(false);
+            const activeData = studyData[activeTab];
+
+            // ページトップへスクロール
+            const scrollToTop = () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            return (
+                <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-800">
+                    {/* Header */}
+                    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+                        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center gap-2 md:gap-3">
+                                <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white p-2 rounded-lg shadow-md">
+                                    <Icon name="BookOpen" size={20} />
+                                </div>
+                                <div>
+                                    <h1 className="font-bold text-base md:text-xl text-slate-800 leading-none">情報I マスター</h1>
+                                    <p className="text-[10px] text-slate-500 font-medium">共通テスト完全網羅版</p>
+                                </div>
+                            </div>
+                            
+                            <button 
+                                onClick={() => setMemorizeMode(!memorizeMode)}
+                                className={`
+                                    flex items-center gap-2 px-4 py-2 rounded-full text-xs md:text-sm font-bold transition-all shadow-sm
+                                    ${memorizeMode 
+                                        ? 'bg-red-500 text-white border-red-600 ring-2 ring-red-200 transform scale-105' 
+                                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300'}
+                                `}
+                            >
+                                {memorizeMode ? <Icon name="EyeOff" size={16}/> : <Icon name="Eye" size={16}/>}
+                                <span className="hidden sm:inline">{memorizeMode ? '暗記モード中' : '暗記モード'}</span>
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* Navigation */}
+                    <nav className="bg-white border-b border-slate-200 sticky top-[62px] z-40 overflow-x-auto scrollbar-hide shadow-sm">
+                        <div className="max-w-4xl mx-auto flex">
+                            {Object.entries(studyData).map(([key, data]) => (
+                                <button
+                                    key={key}
+                                    onClick={() => { setActiveTab(key); scrollToTop(); }}
+                                    className={`
+                                        flex-1 min-w-[90px] py-3 px-1 text-[10px] sm:text-xs font-bold flex flex-col items-center gap-1.5 border-b-[3px] transition-all
+                                        ${activeTab === key 
+                                            ? `border-${data.color}-500 text-${data.color}-700 bg-${data.color}-50` 
+                                            : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'}
+                                    `}
+                                >
+                                    <Icon name={data.icon} size={20} className={activeTab === key ? `text-${data.color}-500` : "text-slate-300"} />
+                                    <span className="whitespace-nowrap">{data.title.split('・')[0]}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </nav>
+
+                    {/* Main Content */}
+                    <main className="max-w-4xl mx-auto px-4 py-8">
+                        {/* Tab Introduction */}
+                        <div className="mb-8 animate-fade-in">
+                            <h2 className={`text-2xl font-bold mb-2 flex items-center gap-2 text-${activeData.color}-700`}>
+                                <Icon name={activeData.icon} className={`text-${activeData.color}-500`} size={28} />
+                                {activeData.title}
+                            </h2>
+                            <div className="p-3 bg-white rounded-lg border border-slate-200 text-xs sm:text-sm text-slate-600 shadow-sm">
+                                <span className="font-bold text-slate-800">重要ポイント：</span>
+                                {activeTab === 'society' && " 法律は「誰を守るものか」を理解する。セキュリティは「CIA」と「公開鍵暗号」の仕組みが最重要。"}
+                                {activeTab === 'digital' && " 「AD変換」「標本化定理」は頻出。IPアドレスとDNSの関係、パケット交換のメリットを押さえる。"}
+                                {activeTab === 'computer' && " プログラミングは「変数の追跡（トレース）」ができるかが鍵。配列の添字（0からか1からか）に注意。"}
+                                {activeTab === 'data' && " 「分散・相関係数」の意味を言葉で説明できるように。箱ひげ図の読み取りと、外れ値の影響を理解する。"}
+                            </div>
+                        </div>
+
+                        {/* Interactive Widgets */}
+                        {activeTab === 'computer' && <CodeStudy />}
+                        {activeTab === 'digital' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 my-4 shadow-sm">
+                                    <h3 className="font-bold text-blue-800 text-sm mb-2 flex items-center gap-2">
+                                        <Icon name="Binary" size={16}/> 2進数のポイント
+                                    </h3>
+                                    <ul className="list-disc list-inside text-xs text-blue-700 space-y-1">
+                                        <li><span className="font-bold">nビットの情報量</span>：2のn乗通りの情報を表現可能（8bit=256通り）。</li>
+                                        <li><span className="font-bold">16進数</span>：2進数4桁を1桁で表す（0-9, A-F）。カラーコード(#FF0000)などで使用。</li>
+                                    </ul>
+                                </div>
+                                <CalcTool />
+                            </div>
+                        )}
+
+                        {/* Knowledge Sections */}
+                        <div className="space-y-6">
+                            {activeData.sections.map((section, idx) => (
+                                <CategorySection 
+                                    key={idx}
+                                    title={section.title}
+                                    content={section.content}
+                                    isHiddenMode={memorizeMode}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="mt-16 pt-8 border-t border-slate-200 text-center text-slate-400 text-xs">
+                            <p className="font-bold text-slate-500 mb-2">共通テスト 情報I 完全網羅マスター</p>
+                            <p>本アプリは学習支援ツールです。教科書や公式の過去問と合わせて活用してください。</p>
+                            <div className="mt-4 flex justify-center gap-4">
+                                <span>Powered by React</span>
+                                <span>Tailwind CSS</span>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

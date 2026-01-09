@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共通テスト 情報Ⅰ 重点対策ダッシュボード v2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #fdfaf6; color: #374151; }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            height: 300px; 
+            max-height: 400px;
+        }
+        .nav-btn.active { background-color: #d97706; color: white; box-shadow: 0 2px 4px rgba(217, 119, 6, 0.3); }
+        .card { background-color: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 1.5rem; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #f3f4f6; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .tab-content.active { display: block; opacity: 1; }
+        .code-block { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; background: #1f2937; color: #a5f3fc; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.85rem; }
+        
+        /* DNS Simulation Styles */
+        .dns-step { opacity: 0.3; transition: opacity 0.5s; border-left: 4px solid #e5e7eb; padding-left: 1rem; margin-bottom: 1rem; }
+        .dns-step.active { opacity: 1; border-left-color: #3b82f6; }
+        
+        /* Quiz Styles */
+        .quiz-option:checked + label { background-color: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+    </style>
+    <!-- Chosen Palette: Extended Warm Neutrals with Semantic Accents -->
+    <!-- Structure: Added 'Quiz' tab. Enhanced Algorithm with Bubble Sort. Enhanced Data with Scatter Plots. Added DNS flow. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 backdrop-blur-sm bg-opacity-90">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2 cursor-pointer" onclick="switchTab('overview')">
+                <span class="text-amber-600 text-2xl bg-amber-100 p-1 rounded-lg">🎓</span> 
+                <span class="hidden sm:inline">共通テスト 情報Ⅰ 対策</span>
+                <span class="sm:hidden">情報Ⅰ 対策</span>
+            </h1>
+            
+            <!-- Desktop Nav -->
+            <nav class="hidden lg:flex gap-1">
+                <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn active px-3 py-2 rounded-lg text-sm font-bold transition-all">概要</button>
+                <button onclick="switchTab('society')" id="nav-society" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium hover:bg-amber-50 text-gray-600 transition-all">情報社会</button>
+                <button onclick="switchTab('network')" id="nav-network" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium hover:bg-amber-50 text-gray-600 transition-all">NW</button>
+                <button onclick="switchTab('algo')" id="nav-algo" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium hover:bg-amber-50 text-gray-600 transition-all">アルゴリズム</button>
+                <button onclick="switchTab('data')" id="nav-data" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium hover:bg-amber-50 text-gray-600 transition-all">データ</button>
+                <button onclick="switchTab('quiz')" id="nav-quiz" class="nav-btn px-3 py-2 rounded-lg text-sm font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-all ml-2">実戦演習</button>
+            </nav>
+
+            <!-- Mobile Menu Toggle -->
+            <button onclick="toggleMobileMenu()" class="lg:hidden text-gray-600 p-2 rounded hover:bg-gray-100 focus:outline-none">
+                <span class="text-2xl">☰</span>
+            </button>
+        </div>
+
+        <!-- Mobile Nav -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t px-4 py-2 shadow-lg absolute w-full left-0 z-50">
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="switchTab('overview')" class="text-left px-4 py-3 rounded bg-gray-50 hover:bg-amber-50 text-sm">🏠 概要</button>
+                <button onclick="switchTab('society')" class="text-left px-4 py-3 rounded bg-gray-50 hover:bg-amber-50 text-sm">🔒 社会</button>
+                <button onclick="switchTab('network')" class="text-left px-4 py-3 rounded bg-gray-50 hover:bg-amber-50 text-sm">🌐 NW</button>
+                <button onclick="switchTab('algo')" class="text-left px-4 py-3 rounded bg-gray-50 hover:bg-amber-50 text-sm">⚡ アルゴ</button>
+                <button onclick="switchTab('data')" class="text-left px-4 py-3 rounded bg-gray-50 hover:bg-amber-50 text-sm">📊 データ</button>
+                <button onclick="switchTab('quiz')" class="text-left px-4 py-3 rounded bg-indigo-50 text-indigo-700 font-bold col-span-2 text-center text-sm">📝 実戦演習モード</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full relative">
+
+        <!-- Overview Section -->
+        <section id="overview" class="tab-content active space-y-8">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-400 p-6 rounded-2xl text-white shadow-lg">
+                <h2 class="text-3xl font-bold mb-2">学習ダッシュボードへようこそ</h2>
+                <p class="opacity-90">
+                    共通テスト「情報Ⅰ」で差がつくポイントを、シミュレーションと可視化で攻略しましょう。
+                    知識をインプットしたら、右端の「実戦演習」タブで理解度をチェックしてください。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card border-t-4 border-gray-500 hover:bg-gray-50 cursor-pointer" onclick="switchTab('society')">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-3xl bg-gray-100 p-3 rounded-full">🔒</div>
+                        <span class="text-xs font-bold text-gray-400">Information Society</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">情報社会と法規</h3>
+                    <p class="text-sm text-gray-500">認証、セキュリティ、著作権法</p>
+                </div>
+                <div class="card border-t-4 border-blue-500 hover:bg-blue-50 cursor-pointer" onclick="switchTab('network')">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-3xl bg-blue-100 p-3 rounded-full">🌐</div>
+                        <span class="text-xs font-bold text-blue-400">Network</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">ネットワーク</h3>
+                    <p class="text-sm text-gray-500">OSI参照モデル、DNS、プロトコル</p>
+                </div>
+                <div class="card border-t-4 border-green-500 hover:bg-green-50 cursor-pointer" onclick="switchTab('algo')">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-3xl bg-green-100 p-3 rounded-full">⚡</div>
+                        <span class="text-xs font-bold text-green-400">Algorithms</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">アルゴリズム</h3>
+                    <p class="text-sm text-gray-500">探索、整列、計算量、プログラミング</p>
+                </div>
+                <div class="card border-t-4 border-purple-500 hover:bg-purple-50 cursor-pointer" onclick="switchTab('data')">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-3xl bg-purple-100 p-3 rounded-full">📊</div>
+                        <span class="text-xs font-bold text-purple-400">Data Science</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">データの活用</h3>
+                    <p class="text-sm text-gray-500">相関、代表値、デジタル化</p>
+                </div>
+            </div>
+
+            <!-- Key Terms Section -->
+            <div class="card">
+                <h3 class="font-bold text-xl mb-4 text-gray-800">📌 直前チェック！重要キーワード</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm">
+                    <div class="p-2 border-b border-gray-100"><span class="font-bold text-amber-600 block">二要素認証</span>知識・所持・生体の3要素から2つ以上を組み合わせる。</div>
+                    <div class="p-2 border-b border-gray-100"><span class="font-bold text-amber-600 block">DNS</span>ドメイン名とIPアドレスを変換するシステム。</div>
+                    <div class="p-2 border-b border-gray-100"><span class="font-bold text-amber-600 block">モンテカルロ法</span>乱数を用いたシミュレーション手法。</div>
+                    <div class="p-2 border-b border-gray-100"><span class="font-bold text-amber-600 block">二分探索</span>整列済みデータに対して、範囲を半分に絞りながら探す。</div>
+                    <div class="p-2 border-b border-gray-100"><span class="font-bold text-amber-600 block">中央値</span>データを順に並べた時の中央の値。外れ値に強い。</div>
+                    <div class="p-2 border-b border-gray-100"><span class="font-bold text-amber-600 block">公開鍵暗号</span>受信者の公開鍵で暗号化し、受信者の秘密鍵で復号する。</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Society Section -->
+        <section id="society" class="tab-content space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">情報社会とセキュリティ</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 2FA Interactive -->
+                <div class="card bg-white">
+                    <h3 class="font-bold text-lg mb-3 text-amber-700 flex items-center gap-2">
+                        <span>🔑</span> 二要素認証チェッカー
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">セキュリティを高めるには「異なる種類の要素」が必要です。要素をクリックして組み合わせをテストしましょう。</p>
+                    
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button onclick="toggleAuth('pass')" id="btn-pass" class="px-4 py-2 rounded-full border-2 border-gray-200 text-sm font-medium transition hover:bg-gray-50">🧠 パスワード (知識)</button>
+                        <button onclick="toggleAuth('pin')" id="btn-pin" class="px-4 py-2 rounded-full border-2 border-gray-200 text-sm font-medium transition hover:bg-gray-50">🧠 暗証番号 (知識)</button>
+                        <button onclick="toggleAuth('phone')" id="btn-phone" class="px-4 py-2 rounded-full border-2 border-gray-200 text-sm font-medium transition hover:bg-gray-50">📱 スマホ (所持)</button>
+                        <button onclick="toggleAuth('card')" id="btn-card" class="px-4 py-2 rounded-full border-2 border-gray-200 text-sm font-medium transition hover:bg-gray-50">💳 ICカード (所持)</button>
+                        <button onclick="toggleAuth('finger')" id="btn-finger" class="px-4 py-2 rounded-full border-2 border-gray-200 text-sm font-medium transition hover:bg-gray-50">👆 指紋 (生体)</button>
+                        <button onclick="toggleAuth('face')" id="btn-face" class="px-4 py-2 rounded-full border-2 border-gray-200 text-sm font-medium transition hover:bg-gray-50">🙂 顔 (生体)</button>
+                    </div>
+
+                    <div id="auth-display" class="bg-gray-100 rounded-lg p-6 text-center transition-colors duration-300">
+                        <div class="text-gray-400 font-bold">要素を選択してください</div>
+                    </div>
+                </div>
+
+                <!-- Copyright Quiz -->
+                <div class="card bg-blue-50 border border-blue-100">
+                    <h3 class="font-bold text-lg mb-3 text-blue-800 flex items-center gap-2">
+                        <span>©️</span> 著作権・法規のポイント
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded">OK</span>
+                            <span class="text-sm ml-2">自分が見るためにTV番組を録画 (私的使用)</span>
+                        </div>
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">NG</span>
+                            <span class="text-sm ml-2">買ったCDをコピーしてクラス全員に配る (私的使用の範囲外)</span>
+                        </div>
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">NG</span>
+                            <span class="text-sm ml-2">好きなアイドルの写真をSNSアイコンにする (公衆送信権侵害)</span>
+                        </div>
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded">OK</span>
+                            <span class="text-sm ml-2">授業の課題レポートで、出典を明記して文章を引用 (引用の要件)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Network Section -->
+        <section id="network" class="tab-content space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">情報通信ネットワーク</h2>
+
+            <!-- DNS Simulator -->
+            <div class="card bg-white">
+                <h3 class="font-bold text-lg mb-4 text-indigo-700 flex items-center gap-2">
+                    <span>🌍</span> DNSの仕組み (名前解決の旅)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="col-span-1 space-y-4">
+                        <p class="text-sm text-gray-600">ブラウザにURLを入力してから、サイトが表示されるまでの裏側を見てみましょう。</p>
+                        <button onclick="runDNSSimulation()" class="w-full bg-indigo-600 text-white py-2 rounded shadow hover:bg-indigo-700 transition">
+                            ▶️ `example.jp` にアクセス！
+                        </button>
+                        <button onclick="resetDNS()" class="w-full bg-gray-200 text-gray-600 py-2 rounded hover:bg-gray-300 transition text-sm">
+                            リセット
+                        </button>
+                    </div>
+                    <div class="col-span-2 bg-gray-50 p-4 rounded-lg h-64 overflow-y-auto" id="dns-log-container">
+                        <div id="dns-step-1" class="dns-step">
+                            <div class="font-bold text-sm text-gray-500">Step 1: 問い合わせ</div>
+                            <div class="text-sm">PC「ねえ、`example.jp` のIPアドレス教えて？」→ <span class="font-bold">DNSキャッシュサーバ</span>へ</div>
+                        </div>
+                        <div id="dns-step-2" class="dns-step">
+                            <div class="font-bold text-sm text-gray-500">Step 2: ルートへの旅</div>
+                            <div class="text-sm">キャッシュサーバ「知らないから<span class="font-bold">ルートサーバ</span>に聞くわ。`.jp` はどこ？」</div>
+                        </div>
+                        <div id="dns-step-3" class="dns-step">
+                            <div class="font-bold text-sm text-gray-500">Step 3: TLDサーバ</div>
+                            <div class="text-sm">ルート「`.jp` の管理サーバを紹介するよ」→ <span class="font-bold">JPドメイン管理サーバ</span>へ</div>
+                        </div>
+                        <div id="dns-step-4" class="dns-step">
+                            <div class="font-bold text-sm text-gray-500">Step 4: 権威DNSサーバ</div>
+                            <div class="text-sm">JPサーバ「`example.jp` の管理サーバはあっちだよ」→ <span class="font-bold">example.jp のDNSサーバ</span>へ</div>
+                        </div>
+                        <div id="dns-step-5" class="dns-step">
+                            <div class="font-bold text-sm text-gray-500">Step 5: 解決！</div>
+                            <div class="text-sm">権威サーバ「IPは `192.0.2.1` だよ！」→ PCに返答 → <span class="font-bold text-indigo-600">Webサイト表示！</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protocol Stack -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="font-bold text-lg mb-2">OSI参照モデル (TCP/IP)</h3>
+                    <div class="space-y-1 mt-4">
+                        <div class="group relative bg-purple-100 p-3 rounded cursor-help border-l-4 border-purple-500">
+                            <span class="font-bold text-purple-900">第4層 トランスポート層</span>
+                            <span class="float-right text-xs text-purple-600 font-mono">TCP / UDP</span>
+                            <div class="hidden group-hover:block absolute z-10 bg-gray-800 text-white text-xs p-2 rounded w-64 -top-12 left-0 shadow-xl">
+                                信頼性の確保、ポート番号によるアプリの識別。宅配便の「再配達」や「宛名確認」の役割。
+                            </div>
+                        </div>
+                        <div class="group relative bg-blue-100 p-3 rounded cursor-help border-l-4 border-blue-500">
+                            <span class="font-bold text-blue-900">第3層 ネットワーク層</span>
+                            <span class="float-right text-xs text-blue-600 font-mono">IP / ICMP</span>
+                            <div class="hidden group-hover:block absolute z-10 bg-gray-800 text-white text-xs p-2 rounded w-64 -top-12 left-0 shadow-xl">
+                                ルーティング（経路制御）、IPアドレスによる宛先識別。カーナビの役割。
+                            </div>
+                        </div>
+                        <div class="group relative bg-green-100 p-3 rounded cursor-help border-l-4 border-green-500">
+                            <span class="font-bold text-green-900">第2層 データリンク層</span>
+                            <span class="float-right text-xs text-green-600 font-mono">Ethernet / Wi-Fi</span>
+                            <div class="hidden group-hover:block absolute z-10 bg-gray-800 text-white text-xs p-2 rounded w-64 -top-12 left-0 shadow-xl">
+                                同一ネットワーク内での通信。MACアドレスを使用。スイッチングハブが活躍。
+                            </div>
+                        </div>
+                        <div class="group relative bg-gray-100 p-3 rounded cursor-help border-l-4 border-gray-500">
+                            <span class="font-bold text-gray-900">第1層 物理層</span>
+                            <span class="float-right text-xs text-gray-600 font-mono">Cable / Signal</span>
+                            <div class="hidden group-hover:block absolute z-10 bg-gray-800 text-white text-xs p-2 rounded w-64 -top-12 left-0 shadow-xl">
+                                電気信号や光信号への変換。LANケーブルやコネクタの形状。
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2 text-right">※各層にマウスを乗せると詳細を表示</p>
+                </div>
+                <div class="card">
+                    <h3 class="font-bold text-lg mb-2">IPアドレス計算メモ</h3>
+                    <div class="text-sm space-y-4">
+                        <p>IPv4アドレスは32ビット。8ビットずつ4つに区切る。</p>
+                        <div class="bg-gray-800 text-green-400 font-mono p-3 rounded text-center">
+                            192.168.1.1<br>
+                            ⬇️<br>
+                            11000000.10101000.00000001.00000001
+                        </div>
+                        <p class="text-gray-600">
+                            <span class="font-bold">DHCP:</span> ネットワーク設定の自動化<br>
+                            <span class="font-bold">NAT/NAPT:</span> プライベートIPとグローバルIPの変換
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Algorithms Section -->
+        <section id="algo" class="tab-content space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">アルゴリズムと計算量</h2>
+
+            <!-- Sorting Viz -->
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg text-green-700 flex items-center gap-2">
+                        <span>🔄</span> 整列アルゴリズム: 基本交換法 (Bubble Sort)
+                    </h3>
+                    <div class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">計算量: $O(n^2)$</div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="col-span-1 space-y-4">
+                        <p class="text-sm text-gray-600">隣り合うデータを比較し、大きさが逆なら入れ替える操作を繰り返します。</p>
+                        <button onclick="startBubbleSort()" id="btn-sort-start" class="w-full bg-green-600 text-white py-2 rounded shadow hover:bg-green-700 transition">スタート</button>
+                        <button onclick="resetSort()" id="btn-sort-reset" class="w-full bg-gray-200 text-gray-600 py-2 rounded hover:bg-gray-300 transition text-sm">リセット</button>
+                        <div id="sort-status" class="text-xs font-mono bg-gray-100 p-2 rounded h-20 overflow-y-auto">待機中...</div>
+                    </div>
+                    <div class="col-span-3">
+                        <div class="chart-container">
+                            <canvas id="sortChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Viz -->
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg text-blue-700 flex items-center gap-2">
+                        <span>🔍</span> 探索アルゴリズム比較
+                    </h3>
+                    <div class="flex gap-2">
+                         <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">線形: $O(n)$</span>
+                         <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">二分: $O(\log n)$</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="col-span-1 space-y-4">
+                        <p class="text-sm text-gray-600">「77」を探します。<br>二分探索はデータが<span class="font-bold">整列済み</span>であることが条件です。</p>
+                        <button onclick="runLinearSearch()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded shadow transition text-sm">線形探索 (Linear)</button>
+                        <button onclick="runBinarySearch()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded shadow transition text-sm">二分探索 (Binary)</button>
+                    </div>
+                    <div class="col-span-3">
+                        <div class="chart-container">
+                            <canvas id="searchChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Section -->
+        <section id="data" class="tab-content space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">データの活用</h2>
+
+            <!-- Correlation Simulator -->
+            <div class="card">
+                <h3 class="font-bold text-lg mb-4 text-purple-700 flex items-center gap-2">
+                    <span>📈</span> 相関関係シミュレーター
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="col-span-1 space-y-3">
+                        <p class="text-sm text-gray-600">相関係数 $r$ によって散布図の形状がどう変わるか確認しましょう。</p>
+                        <button onclick="updateCorrelation(0.9)" class="w-full text-left px-4 py-2 bg-purple-50 hover:bg-purple-100 rounded text-sm text-purple-900 font-bold border border-purple-200">
+                            強い正の相関 ($r \approx 0.9$) <br><span class="text-xs font-normal text-gray-500">気温が上がるとアイスが売れる</span>
+                        </button>
+                        <button onclick="updateCorrelation(-0.8)" class="w-full text-left px-4 py-2 bg-purple-50 hover:bg-purple-100 rounded text-sm text-purple-900 font-bold border border-purple-200">
+                            負の相関 ($r \approx -0.8$) <br><span class="text-xs font-normal text-gray-500">価格が上がると売上が減る</span>
+                        </button>
+                        <button onclick="updateCorrelation(0.0)" class="w-full text-left px-4 py-2 bg-purple-50 hover:bg-purple-100 rounded text-sm text-purple-900 font-bold border border-purple-200">
+                            相関なし ($r \approx 0$) <br><span class="text-xs font-normal text-gray-500">身長とテストの点数</span>
+                        </button>
+                    </div>
+                    <div class="col-span-2">
+                        <div class="chart-container">
+                            <canvas id="scatterChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mean vs Median -->
+            <div class="card bg-gray-50">
+                <h3 class="font-bold text-lg mb-4 text-gray-700">代表値の罠 (平均値 vs 中央値)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-4">
+                            極端な値（外れ値）がある場合、平均値は大きく影響を受けますが、中央値はほとんど変化しません。
+                        </p>
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-bold">現在のデータ:</span>
+                                <span class="text-xs text-gray-400">[300, 350, 380, 400, 420] + ???</span>
+                            </div>
+                            <button onclick="toggleOutlier()" id="btn-toggle-outlier" class="w-full bg-orange-500 text-white py-2 rounded shadow hover:bg-orange-600 transition">
+                                💰 超富裕層 (年収5000万) を追加
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center bg-white p-3 rounded border-l-4 border-blue-500">
+                            <span class="text-sm text-gray-500">平均値 (Mean)</span>
+                            <span id="stat-mean" class="font-mono font-bold text-xl text-blue-600">370</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-white p-3 rounded border-l-4 border-green-500">
+                            <span class="text-sm text-gray-500">中央値 (Median)</span>
+                            <span id="stat-median" class="font-mono font-bold text-xl text-green-600">380</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="tab-content space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2 text-indigo-700">実戦ミニテスト</h2>
+            <p class="text-gray-600">ここまでの学習内容からランダムに出題されます。</p>
+
+            <div id="quiz-container" class="space-y-6">
+                <!-- Questions injected by JS -->
+            </div>
+
+            <div class="flex justify-center mt-8">
+                <button onclick="checkQuiz()" class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold shadow-lg hover:bg-indigo-700 transition transform hover:-translate-y-1">
+                    採点する
+                </button>
+                <button onclick="renderQuiz()" class="ml-4 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-bold hover:bg-gray-300 transition">
+                    新しい問題
+                </button>
+            </div>
+
+            <div id="quiz-result" class="hidden mt-6 bg-yellow-50 border border-yellow-200 p-6 rounded-lg text-center">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">結果発表</h3>
+                <p id="quiz-score" class="text-4xl font-bold text-indigo-600 mb-2">-- / --</p>
+                <p id="quiz-comment" class="text-gray-600">コメントがここに表示されます</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-10 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-lg font-bold mb-4 text-gray-400">共通テスト 情報Ⅰ 対策ダッシュボード</h2>
+            <div class="flex justify-center gap-4 text-sm text-gray-500">
+                <span>© 2024 Exam Prep Tools</span>
+                <span>•</span>
+                <span>アルゴリズム</span>
+                <span>•</span>
+                <span>データサイエンス</span>
+                <span>•</span>
+                <span>ネットワーク</span>
+            </div>
+            <p class="mt-8 text-xs text-gray-600">
+                本ツールは学習支援を目的としたシミュレーターであり、実際の試験問題の的中を保証するものではありません。<br>
+                Canvas APIおよびChart.jsを使用してブラウザ上で動作しています。
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            auth: new Set(),
+            sortArr: [],
+            isSorting: false,
+            outlierAdded: false,
+            baseIncome: [300, 350, 380, 400, 420],
+        };
+
+        // --- Navigation ---
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(id).classList.add('active');
+            const navBtn = document.getElementById('nav-' + id);
+            if(navBtn) navBtn.classList.add('active');
+            
+            document.getElementById('mobile-menu').classList.add('hidden');
+            
+            // Lazy Load / Refresh Charts
+            if(id === 'algo') {
+                initSortChart();
+                initSearchChart();
+            }
+            if(id === 'data') {
+                initScatterChart();
+            }
+            if(id === 'quiz') {
+                renderQuiz();
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // --- Society: Auth Logic ---
+        function toggleAuth(type) {
+            const btn = document.getElementById('btn-' + type);
+            const display = document.getElementById('auth-display');
+            
+            // Map button ID to Auth Factor Type
+            const factorMap = {
+                'pass': 'knowledge', 'pin': 'knowledge',
+                'phone': 'possession', 'card': 'possession',
+                'finger': 'biometrics', 'face': 'biometrics'
+            };
+            const factor = factorMap[type];
+
+            if (btn.classList.contains('bg-amber-100')) {
+                btn.classList.remove('bg-amber-100', 'text-amber-800', 'border-amber-400');
+                btn.classList.add('border-gray-200');
+                state.auth.delete(type);
+            } else {
+                btn.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-400');
+                btn.classList.remove('border-gray-200');
+                state.auth.add(type);
+            }
+
+            // Calculate distinct factors
+            const selectedFactors = new Set();
+            state.auth.forEach(t => selectedFactors.add(factorMap[t]));
+            
+            const count = selectedFactors.size;
+            
+            if (count === 0) {
+                display.className = "bg-gray-100 rounded-lg p-6 text-center";
+                display.innerHTML = `<div class="text-gray-400 font-bold">要素を選択してください</div>`;
+            } else if (count >= 2) {
+                display.className = "bg-green-100 border border-green-300 rounded-lg p-6 text-center";
+                display.innerHTML = `
+                    <div class="text-3xl mb-2">✅ 認証成功</div>
+                    <div class="font-bold text-green-800">二要素認証の要件を満たしています</div>
+                    <div class="text-sm text-green-600 mt-1">選択された要素: ${count}種類</div>
+                `;
+            } else {
+                // If 1 factor type but multiple items (e.g. 2 passwords)
+                if (state.auth.size >= 2) {
+                    display.className = "bg-red-50 border border-red-200 rounded-lg p-6 text-center";
+                    display.innerHTML = `
+                        <div class="text-3xl mb-2">⚠️ 認証強度不足</div>
+                        <div class="font-bold text-red-700">要素の種類が重複しています</div>
+                        <div class="text-sm text-red-600 mt-1">「二段階」ですが「二要素」ではありません</div>
+                    `;
+                } else {
+                    display.className = "bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center";
+                    display.innerHTML = `
+                        <div class="text-xl mb-2 text-yellow-700">あと1種類必要です</div>
+                    `;
+                }
+            }
+        }
+
+        // --- Network: DNS Simulation ---
+        async function runDNSSimulation() {
+            document.querySelectorAll('.dns-step').forEach(el => el.classList.remove('active'));
+            const steps = [1, 2, 3, 4, 5];
+            
+            for (const step of steps) {
+                const el = document.getElementById(`dns-step-${step}`);
+                el.classList.add('active');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                await new Promise(r => setTimeout(r, 1200));
+            }
+        }
+
+        function resetDNS() {
+            document.querySelectorAll('.dns-step').forEach(el => el.classList.remove('active'));
+            document.getElementById('dns-log-container').scrollTop = 0;
+        }
+
+        // --- Algorithm: Bubble Sort ---
+        let sortChartInstance = null;
+
+        function initSortChart() {
+            if (sortChartInstance) return;
+            const ctx = document.getElementById('sortChart').getContext('2d');
+            state.sortArr = Array.from({length: 15}, () => Math.floor(Math.random() * 50) + 5);
+            
+            sortChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: state.sortArr.map((_, i) => i),
+                    datasets: [{
+                        data: state.sortArr,
+                        backgroundColor: '#4ade80',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+        }
+
+        async function startBubbleSort() {
+            if (state.isSorting) return;
+            state.isSorting = true;
+            document.getElementById('btn-sort-start').disabled = true;
+            document.getElementById('btn-sort-start').classList.add('opacity-50');
+            const log = document.getElementById('sort-status');
+            
+            let arr = sortChartInstance.data.datasets[0].data;
+            let n = arr.length;
+            
+            for (let i = 0; i < n - 1; i++) {
+                for (let j = 0; j < n - i - 1; j++) {
+                    // Highlight comparing
+                    const colors = new Array(n).fill('#4ade80'); // Green default
+                    colors[j] = '#fbbf24'; // Amber comparing
+                    colors[j+1] = '#fbbf24';
+                    // Mark sorted end
+                    for(let k = n-i; k < n; k++) colors[k] = '#3b82f6'; // Blue sorted
+
+                    sortChartInstance.data.datasets[0].backgroundColor = colors;
+                    sortChartInstance.update();
+                    log.innerHTML = `比較中: index[${j}] vs index[${j+1}]`;
+                    
+                    await new Promise(r => setTimeout(r, 100));
+
+                    if (arr[j] > arr[j+1]) {
+                        // Swap
+                        let temp = arr[j];
+                        arr[j] = arr[j+1];
+                        arr[j+1] = temp;
+                        
+                        colors[j] = '#ef4444'; // Red swapped
+                        colors[j+1] = '#ef4444';
+                        sortChartInstance.data.datasets[0].backgroundColor = colors;
+                        sortChartInstance.update();
+                        await new Promise(r => setTimeout(r, 150));
+                    }
+                }
+            }
+            // All sorted
+            sortChartInstance.data.datasets[0].backgroundColor = new Array(n).fill('#3b82f6');
+            sortChartInstance.update();
+            log.innerHTML = "整列完了！";
+            state.isSorting = false;
+            document.getElementById('btn-sort-start').disabled = false;
+            document.getElementById('btn-sort-start').classList.remove('opacity-50');
+        }
+
+        function resetSort() {
+            if(state.isSorting) return;
+            state.sortArr = Array.from({length: 15}, () => Math.floor(Math.random() * 50) + 5);
+            sortChartInstance.data.datasets[0].data = state.sortArr;
+            sortChartInstance.data.datasets[0].backgroundColor = '#4ade80';
+            sortChartInstance.update();
+            document.getElementById('sort-status').innerHTML = "リセット完了";
+        }
+
+        // --- Algorithm: Search (Simplified from v1) ---
+        let searchChartInstance = null;
+        function initSearchChart() {
+            if(searchChartInstance) return;
+            const ctx = document.getElementById('searchChart').getContext('2d');
+            searchChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({length: 20}, (_, i) => i+1),
+                    datasets: [{
+                        data: Array.from({length: 20}, (_, i) => i*5 + 2),
+                        backgroundColor: '#e5e7eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { display: false } }
+                }
+            });
+        }
+
+        async function runLinearSearch() {
+            const arr = searchChartInstance.data.datasets[0].data;
+            const target = 72; // Index 14
+            for(let i=0; i<arr.length; i++) {
+                const colors = new Array(20).fill('#e5e7eb');
+                colors[i] = '#f87171'; // Red check
+                searchChartInstance.data.datasets[0].backgroundColor = colors;
+                searchChartInstance.update();
+                await new Promise(r => setTimeout(r, 100));
+                if(i === 14) {
+                    colors[i] = '#22c55e'; // Found
+                    searchChartInstance.data.datasets[0].backgroundColor = colors;
+                    searchChartInstance.update();
+                    break;
+                }
+            }
+        }
+
+        async function runBinarySearch() {
+            let low = 0, high = 19;
+            const targetIndex = 14;
+            while(low <= high) {
+                let mid = Math.floor((low+high)/2);
+                const colors = new Array(20).fill('#e5e7eb');
+                
+                // Highlight range
+                for(let k=low; k<=high; k++) colors[k] = '#bfdbfe'; // Blue range
+                colors[mid] = '#fbbf24'; // Check mid
+                
+                searchChartInstance.data.datasets[0].backgroundColor = colors;
+                searchChartInstance.update();
+                await new Promise(r => setTimeout(r, 600));
+
+                if(mid === targetIndex) {
+                    colors[mid] = '#22c55e';
+                    searchChartInstance.data.datasets[0].backgroundColor = colors;
+                    searchChartInstance.update();
+                    break;
+                } else if (mid < targetIndex) {
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+        }
+
+
+        // --- Data: Scatter Plot ---
+        let scatterChartInstance = null;
+
+        function generateData(correlation, count) {
+            const data = [];
+            for (let i = 0; i < count; i++) {
+                let x = Math.random() * 100;
+                let y = x * correlation + (Math.random() * 40 - 20); // Add noise
+                if (correlation === 0) y = Math.random() * 100; // Pure random
+                data.push({x, y});
+            }
+            return data;
+        }
+
+        function initScatterChart() {
+            if (scatterChartInstance) return;
+            const ctx = document.getElementById('scatterChart').getContext('2d');
+            scatterChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'サンプルデータ',
+                        data: generateData(0.9, 50),
+                        backgroundColor: '#8b5cf6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { type: 'linear', position: 'bottom', title: {display: true, text: '変数 X'} },
+                        y: { title: {display: true, text: '変数 Y'} }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateCorrelation(r) {
+            const newData = generateData(r, 50);
+            scatterChartInstance.data.datasets[0].data = newData;
+            
+            // Adjust label based on r
+            let color = '#8b5cf6'; // purple
+            if (r > 0.5) color = '#ef4444'; // red for positive
+            if (r < -0.5) color = '#3b82f6'; // blue for negative
+            if (r === 0) color = '#6b7280'; // gray
+            
+            scatterChartInstance.data.datasets[0].backgroundColor = color;
+            scatterChartInstance.update();
+        }
+
+        // --- Data: Outlier Toggle ---
+        function toggleOutlier() {
+            const btn = document.getElementById('btn-toggle-outlier');
+            const meanDisplay = document.getElementById('stat-mean');
+            const medianDisplay = document.getElementById('stat-median');
+            
+            let currentArr = [...state.baseIncome];
+            
+            if (!state.outlierAdded) {
+                // Add Outlier (5000)
+                currentArr.push(5000);
+                btn.innerText = "🔄 リセット";
+                btn.classList.replace('bg-orange-500', 'bg-gray-500');
+                btn.classList.replace('hover:bg-orange-600', 'hover:bg-gray-600');
+                state.outlierAdded = true;
+            } else {
+                // Reset
+                btn.innerText = "💰 超富裕層 (年収5000万) を追加";
+                btn.classList.replace('bg-gray-500', 'bg-orange-500');
+                btn.classList.replace('hover:bg-gray-600', 'hover:bg-orange-600');
+                state.outlierAdded = false;
+            }
+
+            // Calc
+            const sum = currentArr.reduce((a,b)=>a+b,0);
+            const mean = Math.round(sum / currentArr.length);
+            
+            const sorted = [...currentArr].sort((a,b)=>a-b);
+            const mid = Math.floor(sorted.length/2);
+            const median = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid-1]+sorted[mid])/2;
+
+            meanDisplay.innerText = mean;
+            medianDisplay.innerText = median;
+            
+            // Highlight changes
+            meanDisplay.classList.add('scale-110');
+            setTimeout(()=>meanDisplay.classList.remove('scale-110'), 200);
+        }
+
+        // --- Quiz System ---
+        const questions = [
+            { q: "IPアドレスとドメイン名を対応させる仕組みは？", options: ["DHCP", "DNS", "HTTP", "SSL"], ans: 1 },
+            { q: "二分探索を行うための必須条件は？", options: ["データ数が多いこと", "データが整列済みであること", "データが数値であること", "乱数を使うこと"], ans: 1 },
+            { q: "アナログ信号をデジタル化する3段階の正しい順序は？", options: ["量子化→標本化→符号化", "標本化→量子化→符号化", "符号化→標本化→量子化", "標本化→符号化→量子化"], ans: 1 },
+            { q: "外れ値の影響を最も受けにくい代表値は？", options: ["平均値", "最大値", "中央値", "合計"], ans: 2 },
+            { q: "著作権法において、許諾なく行える行為は？", options: ["友人にコピーして配る", "SNSアイコンに利用", "私的使用のための複製", "商用サイトへの転載"], ans: 2 }
+        ];
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = "";
+            document.getElementById('quiz-result').classList.add('hidden');
+            
+            // Shuffle questions simply
+            const shuffled = [...questions].sort(() => 0.5 - Math.random());
+            
+            shuffled.forEach((item, idx) => {
+                const qDiv = document.createElement('div');
+                qDiv.className = "card bg-white p-4 shadow-sm border border-gray-100";
+                
+                let optsHtml = "";
+                item.options.forEach((opt, optIdx) => {
+                    optsHtml += `
+                        <div class="flex items-center mt-2">
+                            <input type="radio" name="q${idx}" value="${optIdx}" id="q${idx}_${optIdx}" class="quiz-option hidden" data-correct="${optIdx === item.ans}">
+                            <label for="q${idx}_${optIdx}" class="w-full px-4 py-2 border rounded cursor-pointer hover:bg-gray-50 transition select-none text-sm">
+                                ${opt}
+                            </label>
+                        </div>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <p class="font-bold text-gray-800 mb-2">Q${idx+1}. ${item.q}</p>
+                    <div class="space-y-1">${optsHtml}</div>
+                    <div class="feedback hidden mt-2 text-sm font-bold p-2 rounded"></div>
+                `;
+                container.appendChild(qDiv);
+            });
+        }
+
+        function checkQuiz() {
+            let score = 0;
+            const qDivs = document.getElementById('quiz-container').children;
+            
+            for (let i = 0; i < qDivs.length; i++) {
+                const inputs = qDivs[i].querySelectorAll('input');
+                const feedback = qDivs[i].querySelector('.feedback');
+                let answered = false;
+                
+                inputs.forEach(input => {
+                    if (input.checked) {
+                        answered = true;
+                        if (input.dataset.correct === "true") {
+                            score++;
+                            feedback.innerHTML = "⭕ 正解！";
+                            feedback.className = "feedback mt-2 text-sm font-bold p-2 rounded bg-green-100 text-green-700 block";
+                        } else {
+                            feedback.innerHTML = "❌ 不正解...";
+                            feedback.className = "feedback mt-2 text-sm font-bold p-2 rounded bg-red-100 text-red-700 block";
+                        }
+                    }
+                    input.disabled = true; // Lock
+                });
+
+                if(!answered) {
+                     feedback.innerHTML = "⚠️ 未回答";
+                     feedback.className = "feedback mt-2 text-sm font-bold p-2 rounded bg-yellow-100 text-yellow-700 block";
+                }
+            }
+
+            const resultBox = document.getElementById('quiz-result');
+            resultBox.classList.remove('hidden');
+            document.getElementById('quiz-score').innerText = `${score} / ${qDivs.length}`;
+            
+            let comment = "";
+            if(score === qDivs.length) comment = "素晴らしい！完璧な理解度です 🎉";
+            else if(score >= qDivs.length * 0.6) comment = "良い調子です！間違えた箇所を復習しましょう 👍";
+            else comment = "もう一度解説タブを読んで再挑戦しましょう 💪";
+            
+            document.getElementById('quiz-comment').innerText = comment;
+            resultBox.scrollIntoView({behavior: 'smooth'});
+        }
+
+        // Init tabs
+        switchTab('overview');
+
+    </script>
+</body>
+</html>
