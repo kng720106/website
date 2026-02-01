@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gemini 2.5 Flash Lite - Immersive Chat</title>
+    <title>Gemini 2.5 Flash Lite - Custom Font Support</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,30 @@
 
     <style>
         /* =========================================
+           Custom Fonts Configuration
+           ========================================= */
+        /* ここにfontsフォルダ内の実際のファイル名を指定してください。
+           フォーマットがttfの場合は format('truetype')、woff2の場合は format('woff2') に変更します。
+        */
+        @font-face {
+            font-family: 'AppFont';
+            /* ↓↓↓ ファイル名を変更してください ↓↓↓ */
+            src: url('fonts/AP-OTF-GothicBBBPr6N-Regular.otf') format('opentype');
+            /* ↑↑↑ ファイル名を変更してください ↑↑↑ */
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'AppFont';
+            /* ↓↓↓ 太字用ファイル名を変更してください ↓↓↓ */
+            src: url('fonts/AP-OTF-FutoGoB101Pr6N-Medium.otf') format('opentype');
+            /* ↑↑↑ 太字用ファイル名を変更してください ↑↑↑ */
+            font-weight: 700;
+            font-display: swap;
+        }
+
+        /* =========================================
            Global Reset & Interactive Base
            ========================================= */
         * {
@@ -29,7 +53,13 @@
             --brand-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
             --brand-shadow: rgba(59, 130, 246, 0.3);
             --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --font-main: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+            
+            /* フォント優先順位: 
+               1. AppFont (fontsフォルダのファイル)
+               2. Inter/Noto Sans JP (Webフォント)
+               3. システムフォント
+            */
+            --font-main: 'AppFont', 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         ::selection {
@@ -258,85 +288,28 @@
         /* =========================================
            Markdown / Content Styles
            ========================================= */
-
         .bubble p { margin: 0 0 1em 0; }
         .bubble p:last-child { margin-bottom: 0; }
-
-        .bubble h1, .bubble h2, .bubble h3 {
-            font-weight: 700;
-            margin: 1.5em 0 0.6em 0;
-            line-height: 1.3;
-        }
+        .bubble h1, .bubble h2, .bubble h3 { font-weight: 700; margin: 1.5em 0 0.6em 0; line-height: 1.3; }
         .bubble h1 { font-size: 1.6em; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 0.3em; }
         .message.user .bubble h1 { border-bottom-color: rgba(255,255,255,0.3); }
-
         .bubble ul, .bubble ol { margin: 0.8em 0; padding-left: 1.5em; }
         .bubble li { margin-bottom: 0.4em; }
-
-        .bubble table {
-            width: 100%;
-            border-collapse: collapse;
-            border-spacing: 0;
-            margin: 1.2em 0;
-            font-size: 0.95em;
-        }
-        .bubble th, .bubble td {
-            border: 1px solid #cbd5e1;
-            padding: 8px 12px;
-            text-align: left;
-            vertical-align: top;
-            word-break: normal;
-        }
+        .bubble table { width: 100%; border-collapse: collapse; border-spacing: 0; margin: 1.2em 0; font-size: 0.95em; }
+        .bubble th, .bubble td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; vertical-align: top; word-break: normal; }
         .bubble th { background-color: #f1f5f9; font-weight: 700; }
         .message.user .bubble th, .message.user .bubble td { border-color: rgba(255,255,255,0.3); }
         .message.user .bubble th { background-color: rgba(255,255,255,0.15); color: #fff; }
-
-        .bubble code {
-            font-family: 'SFMono-Regular', Consolas, monospace;
-            background: #f1f5f9;
-            color: #334155;
-            padding: 2px 6px;
-            border-radius: 6px;
-            font-size: 0.9em;
-            border: 1px solid #e2e8f0;
-        }
-        .message.user .bubble code {
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            border: none;
-        }
-
-        .bubble pre {
-            background: #1e293b;
-            color: #f8fafc;
-            padding: 16px;
-            border-radius: 12px;
-            overflow-x: auto;
-            margin: 1.2em 0;
-            border: 1px solid rgba(0,0,0,0.05);
-            font-family: 'SFMono-Regular', Consolas, monospace;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-        .bubble pre code {
-            background: transparent;
-            color: inherit;
-            padding: 0;
-            border: none;
-        }
-
-        .bubble a {
-            color: #2563eb;
-            text-decoration: none;
-            font-weight: 600;
-            border-bottom: 1px solid transparent;
-            transition: border-bottom 0.2s;
-        }
+        .bubble code { font-family: 'SFMono-Regular', Consolas, monospace; background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 6px; font-size: 0.9em; border: 1px solid #e2e8f0; }
+        .message.user .bubble code { background: rgba(255,255,255,0.2); color: #fff; border: none; }
+        .bubble pre { background: #1e293b; color: #f8fafc; padding: 16px; border-radius: 12px; overflow-x: auto; margin: 1.2em 0; border: 1px solid rgba(0,0,0,0.05); font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px; line-height: 1.5; }
+        .bubble pre code { background: transparent; color: inherit; padding: 0; border: none; }
+        .bubble a { color: #2563eb; text-decoration: none; font-weight: 600; border-bottom: 1px solid transparent; transition: border-bottom 0.2s; }
         .bubble a:hover { border-bottom-color: currentColor; }
         .message.user .bubble a { color: #fff; }
 
         /* =========================================
-           Math (KaTeX / MathJax) Styles
+           Math (KaTeX)
            ========================================= */
         .katex { font-size: 1.1em; font-family: KaTeX_Main, 'Times New Roman', serif; line-height: 1.2; }
         .katex-display { display: block; margin: 1em 0; overflow-x: auto; overflow-y: hidden; padding: 4px 0; text-align: center; }
@@ -344,57 +317,23 @@
 
         /* Typing Indicator */
         .typing-indicator { display: flex; gap: 5px; padding: 8px 4px; }
-        .dot {
-            width: 6px; height: 6px; background: #cbd5e1;
-            border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both;
-        }
+        .dot { width: 6px; height: 6px; background: #cbd5e1; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
         .dot:nth-child(1) { animation-delay: -0.32s; }
         .dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
 
         /* =========================================
            Custom UI Elements
            ========================================= */
-        .settings-toggle {
-            position: fixed; top: 20px; right: 20px; z-index: 200;
-            background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px);
-            padding: 8px 16px; border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            display: flex; align-items: center; gap: 10px;
-            transition: all 0.3s ease;
-        }
+        .settings-toggle { position: fixed; top: 20px; right: 20px; z-index: 200; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; }
         .settings-toggle:hover { background: rgba(255, 255, 255, 0.9); transform: translateY(1px); }
         .api-input { border: none; background: transparent; font-size: 14px; width: 140px; color: #64748b; }
         .api-input:focus { width: 200px; }
-        .status-dot {
-            width: 8px; height: 8px; border-radius: 50%; background: #22c55e;
-            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-        }
-
-        /* Sources */
-        .sources-container {
-            margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06);
-            font-size: 0.85em;
-        }
-        .sources-label {
-            font-weight: 700; color: #64748b; margin-bottom: 8px;
-            display: flex; align-items: center; gap: 6px;
-            font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.05em;
-        }
-        .source-chip {
-            display: inline-block; background: #f1f5f9; padding: 4px 10px;
-            border-radius: 8px; color: #475569; text-decoration: none;
-            margin-right: 6px; margin-bottom: 6px; transition: all 0.2s;
-            border: 1px solid transparent; font-size: 0.85em;
-        }
-        .source-chip:hover {
-            background: #e2e8f0; border-color: #cbd5e1; color: #334155; transform: translateY(-1px);
-        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+        .sources-container { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); font-size: 0.85em; }
+        .sources-label { font-weight: 700; color: #64748b; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.05em; }
+        .source-chip { display: inline-block; background: #f1f5f9; padding: 4px 10px; border-radius: 8px; color: #475569; text-decoration: none; margin-right: 6px; margin-bottom: 6px; transition: all 0.2s; border: 1px solid transparent; font-size: 0.85em; }
+        .source-chip:hover { background: #e2e8f0; border-color: #cbd5e1; color: #334155; transform: translateY(-1px); }
     </style>
 </head>
 <body>
@@ -408,7 +347,7 @@
         <div class="message ai">
             <div class="bubble">
                 <h1>Gemini 2.5 Flash Lite</h1>
-                <p>準備完了。Google検索と連携した回答が可能です。</p>
+                <p>準備完了。Google検索 (Grounding) 有効化済み。</p>
             </div>
         </div>
     </div>
@@ -519,14 +458,9 @@
 
             chatHistory.push({ role: "user", parts: [{ text: message }] });
             
-            // 修正箇所: googleSearchRetrieval -> google_search
             const payload = {
                 contents: chatHistory,
-                tools: [
-                    {
-                        google_search: {} // 標準的な検索グラウンディングツール
-                    }
-                ],
+                tools: [{ google_search: {} }], // Fixed: Correct tool name
                 generationConfig: { temperature: 0.7 }
             };
 
